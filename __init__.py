@@ -5,14 +5,20 @@ from binaryninja import *
 LEN_LIMIT = 20
 
 
-def name_sanitize(s):
+def name_sanitize_snake_case(s):
     return (
         re.sub(r"[^A-Za-z0-9 ]+", "", s).strip().replace(" ", "_").lower()[:LEN_LIMIT]
     )
 
 
+def name_sanitize_pascal_case(s):
+    return "".join(
+        c for c in re.sub(r"[^A-Za-z0-9 ]+", "", s).strip().title() if not c.isspace()
+    )[:LEN_LIMIT]
+
+
 def auto_define_string(bv, s):
-    auto_name = "str_" + name_sanitize(s.value)
+    auto_name = "s" + name_sanitize_pascal_case(s.value)
 
     symbol = Symbol(SymbolType.DataSymbol, s.start, auto_name)
     bv.define_auto_symbol(symbol)
