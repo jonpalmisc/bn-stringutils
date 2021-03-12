@@ -137,13 +137,13 @@ BinaryViewType.add_binaryview_finalized_event(view_finalized_callback)
 
 
 PluginCommand.register_for_address(
-    "Auto-name selected string",
+    "String Utilities \\ Auto-name selected string",
     "Automatically name the selected string",
     auto_name_selected_string,
 )
 
 PluginCommand.register_for_address(
-    "Auto-name all strings",
+    "String Utilities \\ Auto-name all strings",
     "Automatically name all the strings in the database",
     auto_name_all_strings,
 )
