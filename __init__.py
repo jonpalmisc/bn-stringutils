@@ -10,6 +10,8 @@ S_NAME_STYLE = f"{S_ROOT}.name_style"
 S_NAME_STYLE_SNAKE_CASE = "snake_case"
 S_NAME_STYLE_PASCAL_CASE = "PascalCase"
 
+Settings().register_group(S_ROOT, "String Utilities Plugin")
+
 Settings().register_setting(
     S_NAME_LIMIT,
     json.dumps(
