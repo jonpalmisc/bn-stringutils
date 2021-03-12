@@ -88,7 +88,12 @@ def auto_name_selected_string(bv, address):
     selected_string = bv.get_string_at(address)
 
     if selected_string == None:
-        show_message_box("Error", "Selected object is not a string.", 0, 0)
+        show_message_box(
+            "String Utilities",
+            "No string selected!",
+            MessageBoxButtonSet.OKButtonSet,
+            MessageBoxIcon.ErrorIcon,
+        )
         return
 
     auto_define_string(bv, selected_string)
@@ -109,8 +114,8 @@ def ask_name_all_strings(bv):
     choice = show_message_box(
         "String Utilities",
         "Analysis is complete. Would you like to auto-name identified strings?",
-        MessageBoxIcon.QuestionIcon,
         MessageBoxButtonSet.YesNoButtonSet,
+        MessageBoxIcon.QuestionIcon,
     )
 
     if choice == MessageBoxButtonResult.YesButton:
