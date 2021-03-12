@@ -81,8 +81,12 @@ def auto_name_selected_string(bv, address):
 
 # UI action to automatically name all strings in the database.
 def auto_name_all_strings(bv, address):
+    print("Automatically naming all known strings...")
+
     for s in bv.strings:
         auto_define_string(bv, s)
+
+    print("Done!")
 
 
 PluginCommand.register_for_address(
