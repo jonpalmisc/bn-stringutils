@@ -91,6 +91,32 @@ def auto_name_all_strings(bv, address):
     print("Done!")
 
 
+# Ask the user if they would like to automatically name all identified strings.
+def ask_name_all_strings(bv):
+    choice = show_message_box(
+        "String Utilities",
+        "Analysis is complete. Would you like to auto-name identified strings?",
+        MessageBoxIcon.QuestionIcon,
+        MessageBoxButtonSet.YesNoButtonSet,
+    )
+
+    if choice == MessageBoxButtonResult.YesButton:
+        auto_name_all_strings(bv, 0)
+
+
+# Callback to trigger ask_name_all_strings().
+def analysis_complete_callback(event):
+    mainthread.execute_on_main_thread(lambda: ask_name_all_strings(event.view))
+
+
+# Callback to set up another callback. That's what's up.
+def view_finalized_callback(bv):
+    AnalysisCompletionEvent(bv, analysis_complete_callback)
+
+
+BinaryViewType.add_binaryview_finalized_event(view_finalized_callback)
+
+
 PluginCommand.register_for_address(
     "Auto-name selected string",
     "Automatically name the selected string",
