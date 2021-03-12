@@ -5,12 +5,25 @@ from binaryninja import *
 
 # Settings keys & options
 S_ROOT = "stringutils"
+S_ASK_POST_ANALYSIS = f"{S_ROOT}.ask_post_analysis"
 S_NAME_LIMIT = f"{S_ROOT}.name_limit"
 S_NAME_STYLE = f"{S_ROOT}.name_style"
 S_NAME_STYLE_SNAKE_CASE = "snake_case"
 S_NAME_STYLE_PASCAL_CASE = "PascalCase"
 
 Settings().register_group(S_ROOT, "String Utilities Plugin")
+
+Settings().register_setting(
+    S_ASK_POST_ANALYSIS,
+    json.dumps(
+        {
+            "title": "Post-analysis prompt",
+            "description": "Ask to auto-name all strings after analysis completes.",
+            "default": False,
+            "type": "boolean",
+        }
+    ),
+)
 
 Settings().register_setting(
     S_NAME_LIMIT,
@@ -104,14 +117,15 @@ def ask_name_all_strings(bv):
         auto_name_all_strings(bv, 0)
 
 
-# Callback to trigger ask_name_all_strings().
+# Callback to trigger ask_name_all_strings() after analysis completes if requested.
 def analysis_complete_callback(event):
     mainthread.execute_on_main_thread(lambda: ask_name_all_strings(event.view))
 
 
 # Callback to set up another callback. That's what's up.
 def view_finalized_callback(bv):
-    AnalysisCompletionEvent(bv, analysis_complete_callback)
+    if Settings().get_bool(S_ASK_POST_ANALYSIS):
+        AnalysisCompletionEvent(bv, analysis_complete_callback)
 
 
 BinaryViewType.add_binaryview_finalized_event(view_finalized_callback)
