@@ -65,7 +65,7 @@ def auto_define_string(bv, s):
         auto_name = "s" + name_sanitize_pascal_case(s.value)
 
     symbol = Symbol(SymbolType.DataSymbol, s.start, auto_name)
-    bv.define_auto_symbol(symbol)
+    bv.define_user_symbol(symbol)
 
 
 # UI action to automatically name the string under the cursor.
