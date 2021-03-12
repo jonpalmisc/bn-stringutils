@@ -1,29 +1,74 @@
+import json
 import re
 
 from binaryninja import *
 
-LEN_LIMIT = 20
+# Settings keys & options
+S_ROOT = "stringutils"
+S_NAME_LIMIT = f"{S_ROOT}.name_limit"
+S_NAME_STYLE = f"{S_ROOT}.name_style"
+S_NAME_STYLE_SNAKE_CASE = "snake_case"
+S_NAME_STYLE_PASCAL_CASE = "PascalCase"
 
+Settings().register_setting(
+    S_NAME_LIMIT,
+    json.dumps(
+        {
+            "title": "Maximum name length",
+            "description": "The maximum name length for auto-named strings.",
+            "default": 20,
+            "type": "number",
+        }
+    ),
+)
 
+Settings().register_setting(
+    S_NAME_STYLE,
+    json.dumps(
+        {
+            "title": "Naming convention",
+            "description": "The naming convention to use for auto-named strings.",
+            "default": S_NAME_STYLE_PASCAL_CASE,
+            "type": "string",
+            "enum": [S_NAME_STYLE_SNAKE_CASE, S_NAME_STYLE_PASCAL_CASE],
+        }
+    ),
+)
+
+# Simplify a string into snake_case form.
 def name_sanitize_snake_case(s):
-    return (
-        re.sub(r"[^A-Za-z0-9 ]+", "", s).strip().replace(" ", "_").lower()[:LEN_LIMIT]
-    )
+    cleaned = re.sub(r"[^A-Za-z0-9 ]+", "", s)
+    cleaned = cleaned.strip().replace(" ", "_").lower()
+
+    return name_truncate(cleaned)
 
 
+# Simplify a string into PascalCase form.
 def name_sanitize_pascal_case(s):
-    return "".join(
-        c for c in re.sub(r"[^A-Za-z0-9 ]+", "", s).strip().title() if not c.isspace()
-    )[:LEN_LIMIT]
+    cleaned = re.sub(r"[^A-Za-z0-9 ]+", "", s)
+    cleaned = "".join(c for c in cleaned.strip().title() if not c.isspace())
+
+    return name_truncate(cleaned)
 
 
+# Truncate a string to the length of the user's preference.
+def name_truncate(s):
+    max_len = Settings().get_integer(S_NAME_LIMIT)
+    return s[:max_len]
+
+
+# Automatically defines a named symbol for a given string.
 def auto_define_string(bv, s):
-    auto_name = "s" + name_sanitize_pascal_case(s.value)
+    if Settings().get_string(S_NAME_STYLE) == S_NAME_STYLE_SNAKE_CASE:
+        auto_name = "s_" + name_sanitize_snake_case(s.value)
+    else:
+        auto_name = "s" + name_sanitize_pascal_case(s.value)
 
     symbol = Symbol(SymbolType.DataSymbol, s.start, auto_name)
     bv.define_auto_symbol(symbol)
 
 
+# UI action to automatically name the string under the cursor.
 def auto_name_selected_string(bv, address):
     selected_string = bv.get_string_at(address)
 
@@ -34,6 +79,7 @@ def auto_name_selected_string(bv, address):
     auto_define_string(bv, selected_string)
 
 
+# UI action to automatically name all strings in the database.
 def auto_name_all_strings(bv, address):
     for s in bv.strings:
         auto_define_string(bv, s)
